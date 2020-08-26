@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -17,68 +18,49 @@ func main() {
 	}
 
 	sccTable := make(CorrTable)
-	pearsonTable := make(CorrTable)
-	jacTable := make(CorrTable)
-	diceTable := make(CorrTable)
-	sorTable := make(CorrTable)
-	anderTable := make(CorrTable)
-	ss2Table := make(CorrTable)
-	ochTable := make(CorrTable)
-	ku2Table := make(CorrTable)
+	sccServer := NewCorrServer(&sccTable)
+	//pearsonTable := make(CorrTable)
+	//jacTable := make(CorrTable)
+	//diceTable := make(CorrTable)
+	//sorTable := make(CorrTable)
+	//anderTable := make(CorrTable)
+	//ss2Table := make(CorrTable)
+	//ochTable := make(CorrTable)
+	//ku2Table := make(CorrTable)
 
-	var scc, ps, jacC, diceC, sorC, anderC, ss2C, ochC, ku2C float64
-	var a, b, c, d float64
-	//var wg sync.WaitGroup
-	//
+	var wg sync.WaitGroup
 	start := time.Now()
-	//
+
+	wg.Add(1)
+	go sccWorker(n, sccServer, &abcdTable, &wg)
+	go sccServer.loop()
+
+
 	//wg.Add(1)
-	//go sccWorker(n, &sccTable, &abcdTable, &wg)
-	//
+	//go pearsonWorker(&pearsonTable, &abcdTable, &wg)
 	//wg.Add(1)
-	//go sccWorker(n, &sccTableTwo, &abcdTable, &wg)
-	//
-	//wg.Wait()
-	for i, row := range abcdTable {
+	//go otherCorrWorker(jac, &jacTable, &abcdTable, &wg)
+	//wg.Add(1)
+	//go otherCorrWorker(dice, &diceTable, &abcdTable, &wg)
+	//wg.Add(1)
+	//go otherCorrWorker(sor, &sorTable, &abcdTable, &wg)
+	//wg.Add(1)
+	//go otherCorrWorker(ander, &anderTable, &abcdTable, &wg)
+	//wg.Add(1)
+	//go otherCorrWorker(ss2, &ss2Table, &abcdTable, &wg)
+	//wg.Add(1)
+	//go otherCorrWorker(och, &ochTable, &abcdTable, &wg)
+	//wg.Add(1)
+	//go otherCorrWorker(ku2, &ku2Table, &abcdTable, &wg)
 
-		a = row.a
-		b = row.b
-		c = row.c
-		d = row.d
-
-		scc = sccCalc(a, b, c, d, n)
-		sccTable.updateTable(scc, i)
-
-		ps = pearson(a, b, c, d)
-		pearsonTable.updateTable(ps, i)
-
-		jacC = jac(a, b, c)
-		jacTable.updateTable(jacC, i)
-
-		diceC = dice(a, b, c)
-		diceTable.updateTable(diceC, i)
-
-		sorC = sor(a, b, c)
-		sorTable.updateTable(sorC, i)
-
-		anderC = ander(a, b, c)
-		anderTable.updateTable(anderC, i)
-
-		ss2C = ss2(a, b, c)
-		ss2Table.updateTable(ss2C, i)
-
-		ochC = och(a, b, c)
-		ochTable.updateTable(ochC, i)
-
-		ku2C = ku2(a, b, c)
-		ku2Table.updateTable(ku2C, i)
-	}
-
+	wg.Wait()
+	close(sccServer.updateChannel)
 	elapsed := time.Since(start)
-	fmt.Printf("Took %v\n", elapsed)
-	//fmt.Println("Length is ", len(sccTable))
-	//fmt.Println("Length 2 is ", len(sccTableTwo))
-	//sccServer.Write(128)
+
+	fmt.Printf("Took %v to calculate tables\n", elapsed)
+	sccServer.table.writeTable("newSCC", 128)
+	//start = time.Now()
+	//fmt.Println("Writing tables to disk")
 	//sccTable.writeTable("scc", 128)
 	//pearsonTable.writeTable("pearson", 128)
 	//jacTable.writeTable("jaccard", 128)
@@ -88,4 +70,7 @@ func main() {
 	//ss2Table.writeTable("ss2", 128)
 	//ochTable.writeTable("ochiai", 128)
 	//ku2Table.writeTable("ku2", 128)
+	//elapsed = time.Since(start)
+	//fmt.Printf("Took %v to write tables\n", elapsed)
+
 }

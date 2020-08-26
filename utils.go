@@ -16,7 +16,8 @@ type dfRow struct {
 	d float64
 }
 
-type CorrTable map[string][]int
+type CorrTable map[float64][]int
+type StringCorrTable map[string][]int
 
 func readCsv(filepth string) ([][]string, error) {
 	csvfile, err := os.Open(filepth)
@@ -62,8 +63,11 @@ func parseCsv(pth string) ([]dfRow, error) {
 }
 
 func (table CorrTable) updateTable(key float64, val int) {
-	roundedKey := fmt.Sprintf("%.5f", key)
-	table[roundedKey] = append(table[roundedKey], val)
+	table[key] = append(table[key], val)
+}
+
+func (table StringCorrTable) updateTable(key string, val []int){
+	table[key] = append(table[key], val...)
 }
 
 func toSeqString(idxArr []int, sep string) string {
@@ -75,16 +79,24 @@ func toSeqString(idxArr []int, sep string) string {
 }
 
 func (table CorrTable) writeTable(name string, n int) {
-	pth := fmt.Sprintf("n%v/go_%v_%v_rounded_freqs.txt", n, name, n)
+	pth := fmt.Sprintf("n%v/%v_%v_go_rfreqs.txt", n, name, n)
+
+	var tmpStr, tmpSeq string
+
+	stringTable := make(StringCorrTable)
+	for k, v := range table{
+		tmpStr = fmt.Sprintf("%.5f", k)
+		stringTable.updateTable(tmpStr, v)
+	}
+
 	f, err := os.Create(pth) // Will truncate the file if already exists
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	var tmpStr, tmpSeq string
 
-	for k, v := range table {
+	for k, v := range stringTable {
 		tmpSeq = toSeqString(v, "|")
 		tmpStr = fmt.Sprintf("%v::%v\n", k, tmpSeq)
 		f.WriteString(tmpStr)
