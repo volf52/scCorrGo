@@ -1,6 +1,67 @@
 package main
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"sync"
+	"time"
+)
+
+
+func calculateCorrelations(abcdTable *[]dfRow, n float64, intn int, writeTables bool){
+	sccTable := make(CorrTable)
+	pearsonTable := make(CorrTable)
+	jacTable := make(CorrTable)
+	diceTable := make(CorrTable)
+	sorTable := make(CorrTable)
+	anderTable := make(CorrTable)
+	ss2Table := make(CorrTable)
+	ochTable := make(CorrTable)
+	ku2Table := make(CorrTable)
+
+	var wg sync.WaitGroup
+	start := time.Now()
+
+	wg.Add(1)
+	go sccWorker(n, &sccTable, abcdTable, &wg)
+	wg.Add(1)
+	go pearsonWorker(&pearsonTable, abcdTable, &wg)
+	wg.Add(1)
+	go otherCorrWorker(jac, &jacTable, abcdTable, &wg)
+	wg.Add(1)
+	go otherCorrWorker(dice, &diceTable, abcdTable, &wg)
+	wg.Add(1)
+	go otherCorrWorker(sor, &sorTable, abcdTable, &wg)
+	wg.Add(1)
+	go otherCorrWorker(ander, &anderTable, abcdTable, &wg)
+	wg.Add(1)
+	go otherCorrWorker(ss2, &ss2Table, abcdTable, &wg)
+	wg.Add(1)
+	go otherCorrWorker(och, &ochTable, abcdTable, &wg)
+	wg.Add(1)
+	go otherCorrWorker(ku2, &ku2Table, abcdTable, &wg)
+
+	wg.Wait()
+	elapsed := time.Since(start)
+
+	fmt.Printf("Took %v to calculate tables\n", elapsed)
+
+	if writeTables{
+		start = time.Now()
+		fmt.Println("Writing tables to disk")
+		sccTable.writeTable("scc", intn)
+		pearsonTable.writeTable("pearson", intn)
+		jacTable.writeTable("jaccard", intn)
+		diceTable.writeTable("dice", intn)
+		sorTable.writeTable("sorensen", intn)
+		anderTable.writeTable("anderson", intn)
+		ss2Table.writeTable("ss2", intn)
+		ochTable.writeTable("ochiai", intn)
+		ku2Table.writeTable("ku2", intn)
+		elapsed = time.Since(start)
+		fmt.Printf("Took %v to write tables\n", elapsed)
+	}
+}
 
 func sccCalc(a, b, c, d, n float64) float64 {
 	numer := a * d

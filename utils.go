@@ -66,7 +66,7 @@ func (table CorrTable) updateTable(key float64, val int) {
 	table[key] = append(table[key], val)
 }
 
-func (table StringCorrTable) updateTable(key string, val []int){
+func (table StringCorrTable) updateTable(key string, val []int) {
 	table[key] = append(table[key], val...)
 }
 
@@ -84,7 +84,7 @@ func (table CorrTable) writeTable(name string, n int) {
 	var tmpStr, tmpSeq string
 
 	stringTable := make(StringCorrTable)
-	for k, v := range table{
+	for k, v := range table {
 		tmpStr = fmt.Sprintf("%.5f", k)
 		stringTable.updateTable(tmpStr, v)
 	}
@@ -94,7 +94,6 @@ func (table CorrTable) writeTable(name string, n int) {
 		log.Fatal(err)
 	}
 	defer f.Close()
-
 
 	for k, v := range stringTable {
 		tmpSeq = toSeqString(v, "|")
