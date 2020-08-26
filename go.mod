@@ -1,3 +1,3 @@
-module github.com/volf52/sc_corr_go
+module github.com/volf52/scCorrGo
 
 go 1.15

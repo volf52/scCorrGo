@@ -1,4 +1,7 @@
 .idea
 *.csv
 *.txt
+*.json
 sc_corr_go
+scCorrGo
+go.sum

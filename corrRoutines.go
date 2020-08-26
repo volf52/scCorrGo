@@ -37,3 +37,13 @@ func otherCorrWorker(fn otherFn, table *CorrTable, abcdTable *[]dfRow, wg *sync.
 		table.updateTable(corr, i)
 	}
 }
+
+func (table *CorrTable) syncWrite(name string, n int, wg *sync.WaitGroup){
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+
+		table.writeTable(name, n)
+	}()
+}

@@ -2,65 +2,72 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"sync"
 	"time"
 )
 
-
-func calculateCorrelations(abcdTable *[]dfRow, n float64, intn int, writeTables bool){
-	sccTable := make(CorrTable)
-	pearsonTable := make(CorrTable)
-	jacTable := make(CorrTable)
-	diceTable := make(CorrTable)
-	sorTable := make(CorrTable)
-	anderTable := make(CorrTable)
-	ss2Table := make(CorrTable)
-	ochTable := make(CorrTable)
-	ku2Table := make(CorrTable)
+func calculateCorrelations(abcdTable *[]dfRow, n float64, intn int, writeTables bool) {
+	sccTable := MakeCorrTable()
+	pearsonTable := MakeCorrTable()
+	jacTable := MakeCorrTable()
+	diceTable := MakeCorrTable()
+	sorTable := MakeCorrTable()
+	anderTable := MakeCorrTable()
+	ss2Table := MakeCorrTable()
+	ochTable := MakeCorrTable()
+	ku2Table := MakeCorrTable()
 
 	var wg sync.WaitGroup
+	log.Println("Starting...")
 	start := time.Now()
 
 	wg.Add(1)
-	go sccWorker(n, &sccTable, abcdTable, &wg)
+	go sccWorker(n, sccTable, abcdTable, &wg)
 	wg.Add(1)
-	go pearsonWorker(&pearsonTable, abcdTable, &wg)
+	go pearsonWorker(pearsonTable, abcdTable, &wg)
 	wg.Add(1)
-	go otherCorrWorker(jac, &jacTable, abcdTable, &wg)
+	go otherCorrWorker(jac, jacTable, abcdTable, &wg)
 	wg.Add(1)
-	go otherCorrWorker(dice, &diceTable, abcdTable, &wg)
+	go otherCorrWorker(dice, diceTable, abcdTable, &wg)
 	wg.Add(1)
-	go otherCorrWorker(sor, &sorTable, abcdTable, &wg)
+	go otherCorrWorker(sor, sorTable, abcdTable, &wg)
 	wg.Add(1)
-	go otherCorrWorker(ander, &anderTable, abcdTable, &wg)
+	go otherCorrWorker(ander, anderTable, abcdTable, &wg)
 	wg.Add(1)
-	go otherCorrWorker(ss2, &ss2Table, abcdTable, &wg)
+	go otherCorrWorker(ss2, ss2Table, abcdTable, &wg)
 	wg.Add(1)
-	go otherCorrWorker(och, &ochTable, abcdTable, &wg)
+	go otherCorrWorker(och, ochTable, abcdTable, &wg)
 	wg.Add(1)
-	go otherCorrWorker(ku2, &ku2Table, abcdTable, &wg)
+	go otherCorrWorker(ku2, ku2Table, abcdTable, &wg)
 
 	wg.Wait()
 	elapsed := time.Since(start)
 
 	fmt.Printf("Took %v to calculate tables\n", elapsed)
 
-	if writeTables{
+	if writeTables {
+		var writeWg sync.WaitGroup
 		start = time.Now()
+
 		fmt.Println("Writing tables to disk")
-		sccTable.writeTable("scc", intn)
-		pearsonTable.writeTable("pearson", intn)
-		jacTable.writeTable("jaccard", intn)
-		diceTable.writeTable("dice", intn)
-		sorTable.writeTable("sorensen", intn)
-		anderTable.writeTable("anderson", intn)
-		ss2Table.writeTable("ss2", intn)
-		ochTable.writeTable("ochiai", intn)
-		ku2Table.writeTable("ku2", intn)
+		sccTable.syncWrite("scc", intn, &writeWg)
+		pearsonTable.syncWrite("pearson", intn, &writeWg)
+		jacTable.syncWrite("jaccard", intn, &writeWg)
+		diceTable.syncWrite("dice", intn, &writeWg)
+		sorTable.syncWrite("sorensen", intn, &writeWg)
+		anderTable.syncWrite("anderson", intn, &writeWg)
+		ss2Table.syncWrite("ss2", intn, &writeWg)
+		ochTable.syncWrite("ochiai", intn, &writeWg)
+		ku2Table.syncWrite("ku2", intn, &writeWg)
+
+		writeWg.Wait()
 		elapsed = time.Since(start)
+
 		fmt.Printf("Took %v to write tables\n", elapsed)
 	}
+	log.Println("Done!!!")
 }
 
 func sccCalc(a, b, c, d, n float64) float64 {

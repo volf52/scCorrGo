@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
-	"strings"
 )
 
 type dfRow struct {
@@ -18,6 +20,53 @@ type dfRow struct {
 
 type CorrTable map[float64][]int
 type StringCorrTable map[string][]int
+
+func MakeCorrTable() *CorrTable{
+	table := make(CorrTable)
+
+	return &table
+}
+
+func getNumOfUniqueTuples(n int) int {
+	cs := 0
+	ts := 0
+
+	for i := 0; i < n+2; i++ {
+		cs += i
+		ts += cs
+	}
+
+	return ts
+}
+
+func generate_unique_tuples(N int) *[]dfRow {
+	arr := make([]dfRow, getNumOfUniqueTuples(N))
+
+	idx := 0
+	n := float64(N)
+	i := n
+	var j, k float64
+
+	for i > -1 {
+		j = n - i
+		for j > -1 {
+			k = n - i - j
+			for k > -1 {
+				arr[idx].a = i
+				arr[idx].b = j
+				arr[idx].c = k
+				arr[idx].d = n - i - j - k
+
+				k--
+				idx++
+			}
+			j--
+		}
+		i--
+	}
+
+	return &arr
+}
 
 func readCsv(filepth string) ([][]string, error) {
 	csvfile, err := os.Open(filepth)
@@ -70,34 +119,81 @@ func (table StringCorrTable) updateTable(key string, val []int) {
 	table[key] = append(table[key], val...)
 }
 
-func toSeqString(idxArr []int, sep string) string {
-	var ret []string
-	for _, i := range idxArr {
-		ret = append(ret, strconv.Itoa(i))
+func (table *StringCorrTable) MarshalJSON()([]byte, error){
+	buf := &bytes.Buffer{}
+	buf.Write([]byte{'{'})
+
+	var(
+		b []byte
+		err error
+		i = 0
+		last = len(*table)
+	)
+	for k,v := range *table{
+		b, err = json.Marshal(v)
+		if err != nil{
+			return nil, err
+		}
+
+		buf.WriteString(fmt.Sprintf("%q:", k))
+		buf.Write(b)
+
+		i++
+		if i < last{
+			buf.Write([]byte{','})
+		}
 	}
-	return strings.Join(ret, sep)
+
+	buf.Write([]byte{'}'})
+	return buf.Bytes(), nil
 }
 
-func (table CorrTable) writeTable(name string, n int) {
-	pth := fmt.Sprintf("n%v/%v_%v_go_rfreqs.txt", n, name, n)
+func (table *CorrTable) MarshalJSON()([]byte, error){
+	buf := &bytes.Buffer{}
+	buf.Write([]byte{'{'})
 
-	var tmpStr, tmpSeq string
+	var(
+		b []byte
+		err error
+		i = 0
+		last = len(*table)
+	)
+	for k,v := range *table{
+		b, err = json.Marshal(v)
+		if err != nil{
+			return nil, err
+		}
 
-	stringTable := make(StringCorrTable)
-	for k, v := range table {
+		buf.WriteString(fmt.Sprintf("%q:", fmt.Sprintf("%0.5f", k)))
+		buf.Write(b)
+
+		i++
+		if i < last{
+			buf.Write([]byte{','})
+		}
+	}
+
+	buf.Write([]byte{'}'})
+	return buf.Bytes(), nil
+}
+
+func (table *CorrTable) writeTable(name string, n int) {
+	pth := fmt.Sprintf("n%v/%v_%v_go_rfreqs.json", n, name, n)
+
+	var tmpStr string
+
+	stringTable := make(StringCorrTable, len(*table))
+	for k, v := range *table {
 		tmpStr = fmt.Sprintf("%.5f", k)
 		stringTable.updateTable(tmpStr, v)
 	}
 
-	f, err := os.Create(pth) // Will truncate the file if already exists
-	if err != nil {
+	b, err := json.Marshal(stringTable)
+
+	if err != nil{
 		log.Fatal(err)
 	}
-	defer f.Close()
 
-	for k, v := range stringTable {
-		tmpSeq = toSeqString(v, "|")
-		tmpStr = fmt.Sprintf("%v::%v\n", k, tmpSeq)
-		f.WriteString(tmpStr)
-	}
+	ioutil.WriteFile(pth, b, 0644)
 }
+
