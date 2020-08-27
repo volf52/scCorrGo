@@ -1,11 +1,9 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func main() {
-	n := 8.0
+	n := 256.0
 	intn := int(n)
 
 	stringCorrTbl := readStringCorrTable(fmt.Sprintf("./n%v/scc_%v_go_rfreqs.json", intn, intn))

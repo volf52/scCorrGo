@@ -190,7 +190,7 @@ func (table *CorrTable) writeTable(name string, n int) {
 		stringTable.updateTable(tmpStr, v)
 	}
 
-	b, err := json.Marshal(stringTable)
+	b, err := json.MarshalIndent(stringTable, "", "\t")
 
 	if err != nil {
 		log.Fatal(err)
