@@ -2,12 +2,25 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
-func main() {
-	abcdTable := generate_unique_tuples(8)
+func calcErr(tuple *abcdTuple, toPut *float64, n float64){
+	err := tuple.RMSE(n)
+	*toPut = err
+}
 
-	for _, tuple := range *abcdTable {
-		fmt.Printf("%v - XOR Result: %v\n", tuple, tuple.Xor())
+func main() {
+
+	abcdTable := generate_unique_tuples(4)
+	errorTable := make([]float64, len(*abcdTable))
+
+	start := time.Now()
+	for i, tuple := range *abcdTable {
+		calcErr(&tuple, &errorTable[i], 4.0)
 	}
+	dur := time.Since(start)
+
+	fmt.Printf("RMSE: %v\n", errorTable)
+	fmt.Printf("Took %v\n", dur)
 }

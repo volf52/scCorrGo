@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 func (tuple *abcdTuple) GetOnes() (float64, float64) {
 	xOnes := tuple.a + tuple.b
 	yOnes := tuple.a + tuple.c
@@ -40,4 +42,31 @@ func (tuple *abcdTuple) Nor() float64 {
 
 func (tuple *abcdTuple) Xnor() float64 {
 	return tuple.a + tuple.d
+}
+
+func (tuple *abcdTuple) RMSE(n float64) float64{
+	xVal, yVal := tuple.UpeValue(n)
+	andRes := tuple.And() / n
+
+	errVal := (xVal * yVal) - andRes
+	errVal *= errVal
+
+	errVal /= n
+	errVal = math.Sqrt(errVal)
+
+	return errVal
+}
+
+func (table *ABCDTable) RMSE(n float64) float64{
+	squaredErr := 0.0
+
+	for _, tuple := range *table{
+		xVal, yVal := tuple.UpeValue(n)
+		andRes := tuple.And()
+
+		errVal := (xVal * yVal) - andRes
+		squaredErr += errVal * errVal
+	}
+
+	return math.Sqrt(squaredErr / n)
 }
