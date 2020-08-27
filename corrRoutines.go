@@ -38,7 +38,7 @@ func otherCorrWorker(fn otherFn, table *CorrTable, abcdTable *ABCDTable, wg *syn
 	}
 }
 
-func (table *CorrTable) syncWrite(name string, n int, wg *sync.WaitGroup){
+func (table *CorrTable) syncWrite(name string, n int, wg *sync.WaitGroup) {
 	wg.Add(1)
 
 	go func() {

@@ -2,25 +2,16 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
-func calcErr(tuple *abcdTuple, toPut *float64, n float64){
-	err := tuple.RMSE(n)
-	*toPut = err
-}
-
 func main() {
+	n := 8.0
+	intn := int(n)
 
-	abcdTable := generate_unique_tuples(4)
-	errorTable := make([]float64, len(*abcdTable))
+	stringCorrTbl := readStringCorrTable(fmt.Sprintf("./n%v/scc_%v_go_rfreqs.json", intn, intn))
+	abcdTable := generate_unique_tuples(intn)
 
-	start := time.Now()
-	for i, tuple := range *abcdTable {
-		calcErr(&tuple, &errorTable[i], 4.0)
-	}
-	dur := time.Since(start)
+	errTable := abcdTable.CalculateErrors(stringCorrTbl, n)
 
-	fmt.Printf("RMSE: %v\n", errorTable)
-	fmt.Printf("Took %v\n", dur)
+	errTable.writeErrorTable(fmt.Sprintf("./scc_%v_rmse.json", intn))
 }

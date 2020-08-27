@@ -21,8 +21,9 @@ type abcdTuple struct {
 type ABCDTable []abcdTuple
 type CorrTable map[float64][]int
 type StringCorrTable map[string][]int
+type ErrorTable map[string]float64
 
-func MakeCorrTable() *CorrTable{
+func MakeCorrTable() *CorrTable {
 	table := make(CorrTable)
 
 	return &table
@@ -120,19 +121,19 @@ func (table StringCorrTable) updateTable(key string, val []int) {
 	table[key] = append(table[key], val...)
 }
 
-func (table *StringCorrTable) MarshalJSON()([]byte, error){
+func (table *StringCorrTable) MarshalJSON() ([]byte, error) {
 	buf := &bytes.Buffer{}
 	buf.Write([]byte{'{'})
 
-	var(
-		b []byte
-		err error
-		i = 0
+	var (
+		b    []byte
+		err  error
+		i    = 0
 		last = len(*table)
 	)
-	for k,v := range *table{
+	for k, v := range *table {
 		b, err = json.Marshal(v)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 
@@ -140,7 +141,7 @@ func (table *StringCorrTable) MarshalJSON()([]byte, error){
 		buf.Write(b)
 
 		i++
-		if i < last{
+		if i < last {
 			buf.Write([]byte{','})
 		}
 	}
@@ -149,19 +150,19 @@ func (table *StringCorrTable) MarshalJSON()([]byte, error){
 	return buf.Bytes(), nil
 }
 
-func (table *CorrTable) MarshalJSON()([]byte, error){
+func (table *CorrTable) MarshalJSON() ([]byte, error) {
 	buf := &bytes.Buffer{}
 	buf.Write([]byte{'{'})
 
-	var(
-		b []byte
-		err error
-		i = 0
+	var (
+		b    []byte
+		err  error
+		i    = 0
 		last = len(*table)
 	)
-	for k,v := range *table{
+	for k, v := range *table {
 		b, err = json.Marshal(v)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 
@@ -169,7 +170,7 @@ func (table *CorrTable) MarshalJSON()([]byte, error){
 		buf.Write(b)
 
 		i++
-		if i < last{
+		if i < last {
 			buf.Write([]byte{','})
 		}
 	}
@@ -191,10 +192,35 @@ func (table *CorrTable) writeTable(name string, n int) {
 
 	b, err := json.Marshal(stringTable)
 
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	ioutil.WriteFile(pth, b, 0644)
 }
 
+func readStringCorrTable(pth string) *StringCorrTable {
+	data, err := ioutil.ReadFile(pth)
+
+	if err != nil {
+		panic(err)
+	}
+
+	table := make(StringCorrTable)
+
+	err = json.Unmarshal(data, &table)
+	if err != nil {
+		panic(err)
+	}
+
+	return &table
+}
+
+func (errTable *ErrorTable) writeErrorTable(pth string) {
+	s, err := json.MarshalIndent(errTable, "", "\t")
+	if err != nil {
+		panic(err)
+	}
+
+	ioutil.WriteFile(pth, s, 0644)
+}
