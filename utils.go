@@ -11,13 +11,14 @@ import (
 	"strconv"
 )
 
-type dfRow struct {
+type abcdTuple struct {
 	a float64
 	b float64
 	c float64
 	d float64
 }
 
+type ABCDTable []abcdTuple
 type CorrTable map[float64][]int
 type StringCorrTable map[string][]int
 
@@ -39,8 +40,8 @@ func getNumOfUniqueTuples(n int) int {
 	return ts
 }
 
-func generate_unique_tuples(N int) *[]dfRow {
-	arr := make([]dfRow, getNumOfUniqueTuples(N))
+func generate_unique_tuples(N int) *ABCDTable {
+	arr := make(ABCDTable, getNumOfUniqueTuples(N))
 
 	idx := 0
 	n := float64(N)
@@ -92,14 +93,14 @@ func parseFloat64(s string) float64 {
 	return t
 }
 
-func parseCsv(pth string) ([]dfRow, error) {
+func parseCsv(pth string) (ABCDTable, error) {
 	records, err := readCsv(pth)
 
 	if err != nil {
 		return nil, err
 	}
 
-	arr := make([]dfRow, len(records))
+	arr := make(ABCDTable, len(records))
 
 	for i := 0; i < len(records); i++ {
 		arr[i].a = parseFloat64(records[i][0])

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func calculateCorrelations(abcdTable *[]dfRow, n float64, intn int, writeTables bool) {
+func calculateCorrelations(abcdTable *ABCDTable, n float64, intn int, writeTables bool) {
 	sccTable := MakeCorrTable()
 	pearsonTable := MakeCorrTable()
 	jacTable := MakeCorrTable()

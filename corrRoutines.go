@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-func sccWorker(n float64, table *CorrTable, abcdTable *[]dfRow, wg *sync.WaitGroup) {
+func sccWorker(n float64, table *CorrTable, abcdTable *ABCDTable, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var scc float64
 	for i, row := range *abcdTable {
@@ -14,7 +14,7 @@ func sccWorker(n float64, table *CorrTable, abcdTable *[]dfRow, wg *sync.WaitGro
 	}
 }
 
-func pearsonWorker(table *CorrTable, abcdTable *[]dfRow, wg *sync.WaitGroup) {
+func pearsonWorker(table *CorrTable, abcdTable *ABCDTable, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	var corr float64
@@ -27,7 +27,7 @@ func pearsonWorker(table *CorrTable, abcdTable *[]dfRow, wg *sync.WaitGroup) {
 
 type otherFn func(a, b, c float64) float64
 
-func otherCorrWorker(fn otherFn, table *CorrTable, abcdTable *[]dfRow, wg *sync.WaitGroup) {
+func otherCorrWorker(fn otherFn, table *CorrTable, abcdTable *ABCDTable, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	var corr float64
