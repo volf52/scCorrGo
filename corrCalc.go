@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"sync"
 	"time"
 )
@@ -49,9 +50,13 @@ func calculateCorrelations(abcdTable *[]dfRow, n float64, intn int, writeTables 
 
 	if writeTables {
 		var writeWg sync.WaitGroup
-		start = time.Now()
 
 		fmt.Println("Writing tables to disk")
+		// Will create dir if it doesn't exist
+		os.Mkdir(fmt.Sprintf("n%v", n), 0644)
+
+		start = time.Now()
+
 		sccTable.syncWrite("scc", intn, &writeWg)
 		pearsonTable.syncWrite("pearson", intn, &writeWg)
 		jacTable.syncWrite("jaccard", intn, &writeWg)
