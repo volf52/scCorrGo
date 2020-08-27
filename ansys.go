@@ -1,26 +1,13 @@
 package main
 
 import (
-	"log"
-	"os"
-	"strconv"
+	"fmt"
 )
 
 func main() {
-	args := os.Args
+	abcdTable := generate_unique_tuples(8)
 
-	if len(args) != 2{
-		log.Fatal("Usage: ./{nameOfCliFile} {n}")
+	for _, tuple := range *abcdTable {
+		fmt.Printf("%v - XOR Result: %v\n", tuple, tuple.Xor())
 	}
-
-	n, err := strconv.ParseInt(args[1], 10, 64)
-	intn := int(n)
-
-	if err != nil{
-		log.Fatal(err)
-	}
-
-	abcdTable := generate_unique_tuples(intn)
-
-	calculateCorrelations(abcdTable, float64(n), intn, true)
 }
