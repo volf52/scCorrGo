@@ -1,15 +1,22 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	n := 256.0
+	n := 8.0
 	intn := int(n)
 
-	stringCorrTbl := readStringCorrTable(fmt.Sprintf("./n%v/scc_%v_go_rfreqs.json", intn, intn))
 	abcdTable := generate_unique_tuples(intn)
+	corrTypes := []string{"scc", "anderson", "dice", "jaccard", "ku2", "ochiai", "pearson", "sorensen", "ss2"}
 
-	errTable := abcdTable.CalculateErrors(stringCorrTbl, n)
+	for _, tp := range corrTypes {
+		stringCorrTbl := readStringCorrTable(fmt.Sprintf("./n%v/%s_%v_go_rfreqs.json", intn, tp, intn))
 
-	errTable.writeErrorTable(fmt.Sprintf("./scc_%v_rmse.json", intn))
+		errTable := abcdTable.CalculateErrors(stringCorrTbl, n, GetErrorUpe)
+
+		errTable.writeErrorTable(fmt.Sprintf("./n%v/%s_%v_rmse.json", intn, tp, intn))
+	}
+
 }

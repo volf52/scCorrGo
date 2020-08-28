@@ -92,8 +92,7 @@ func sccCalc(a, b, c, d, n float64) float64 {
 	if numer > 0 {
 		denom = n * math.Min(apb, apc)
 		denom -= apbIntoApc
-	} else
-	{
+	} else {
 		denom = apbIntoApc
 		denom -= n * math.Max(a-d, 0)
 	}
