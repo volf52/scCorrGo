@@ -22,15 +22,19 @@ func (tuple *abcdTuple) UpeValue(n float64) (float64, float64) {
 	xOnes := tuple.a + tuple.b
 	yOnes := tuple.a + tuple.c
 
-	return xOnes / n, yOnes / n
+	xVal := xOnes / n
+	yVal := yOnes / n
+	return xVal, yVal
 }
 
 //TODO: Complete
 func (tuple *abcdTuple) BpeValue(n float64) (float64, float64) {
-	xOnes := 1.0
-	yOnes := 1.0
+	xOnes := tuple.a + tuple.b
+	yOnes := tuple.a + tuple.c
 
-	return xOnes, yOnes
+	xVal := (2*xOnes - n) / n
+	yVal := (2*yOnes - n) / n
+	return xVal, yVal
 }
 
 func (tuple *abcdTuple) And() float64 {
