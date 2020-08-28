@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -46,4 +47,13 @@ func (table *CorrTable) syncWrite(name string, n int, wg *sync.WaitGroup) {
 
 		table.writeTable(name, n)
 	}()
+}
+
+func ErrorWorker(abcdTable *ABCDTable, n float64, intn int, tp string, streamEncoding string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	stringCorrTbl := readStringCorrTable(fmt.Sprintf("./n%v/%s_%v_go_rfreqs.json", intn, tp, intn))
+
+	errTable := abcdTable.CalculateErrors(stringCorrTbl, n, streamEncoding)
+
+	errTable.writeErrorTable(fmt.Sprintf("./n%v/%s_%v_%s_rmse.json", intn, tp, intn, streamEncoding))
 }

@@ -2,21 +2,25 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"time"
 )
 
 func main() {
 	n := 8.0
 	intn := int(n)
+	streamEncoding := "upe"
 
 	abcdTable := generate_unique_tuples(intn)
 	corrTypes := []string{"scc", "anderson", "dice", "jaccard", "ku2", "ochiai", "pearson", "sorensen", "ss2"}
 
+	var wg sync.WaitGroup
+	start := time.Now()
 	for _, tp := range corrTypes {
-		stringCorrTbl := readStringCorrTable(fmt.Sprintf("./n%v/%s_%v_go_rfreqs.json", intn, tp, intn))
-
-		errTable := abcdTable.CalculateErrors(stringCorrTbl, n, GetErrorUpe)
-
-		errTable.writeErrorTable(fmt.Sprintf("./n%v/%s_%v_rmse.json", intn, tp, intn))
+		wg.Add(1)
+		go ErrorWorker(abcdTable, n, intn, tp, streamEncoding, &wg)
 	}
-
+	wg.Wait()
+	elapsed := time.Since(start)
+	fmt.Printf("Took %v seconds", elapsed)
 }

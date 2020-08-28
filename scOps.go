@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"math"
 )
 
-type ErrorFunc func(tuple abcdTuple, n float64) float64
+type ErrorFunc func(tuple *abcdTuple, n float64) float64
 
 func (tuple *abcdTuple) GetOnes() (float64, float64) {
 	xOnes := tuple.a + tuple.b
@@ -56,7 +57,7 @@ func (tuple *abcdTuple) Xnor() float64 {
 	return tuple.a + tuple.d
 }
 
-func GetErrorUpe(tuple abcdTuple, n float64) float64 {
+func GetErrorUpe(tuple *abcdTuple, n float64) float64 {
 	xVal, yVal := tuple.UpeValue(n)
 	andResult := tuple.a / n
 
@@ -64,7 +65,7 @@ func GetErrorUpe(tuple abcdTuple, n float64) float64 {
 }
 
 //TODO: Complete
-func GetErrorBpe(tuple abcdTuple, n float64) float64 {
+func GetErrorBpe(tuple *abcdTuple, n float64) float64 {
 	xVal, yVal := tuple.UpeValue(n)
 	andResult := tuple.a / n
 
@@ -77,7 +78,7 @@ func rmse(idxList *[]int, abcdTable *ABCDTable, n float64, fn ErrorFunc) float64
 	squaredSum := 0.0
 
 	for _, idx := range *idxList {
-		errVal = fn((*abcdTable)[idx], n)
+		errVal = fn(&((*abcdTable)[idx]), n)
 		squaredSum += errVal * errVal
 	}
 
@@ -86,7 +87,16 @@ func rmse(idxList *[]int, abcdTable *ABCDTable, n float64, fn ErrorFunc) float64
 	return math.Sqrt(squaredSum)
 }
 
-func (abcdTable *ABCDTable) CalculateErrors(corrTable *StringCorrTable, n float64, fn ErrorFunc) *ErrorTable {
+func (abcdTable *ABCDTable) CalculateErrors(corrTable *StringCorrTable, n float64, tp string) *ErrorTable {
+	var fn ErrorFunc
+	switch tp {
+	case "upe":
+		fn = GetErrorUpe
+	case "bpe":
+		fn = GetErrorBpe
+	default:
+		panic(fmt.Sprintf("%s is not an error function", tp))
+	}
 	errorTable := make(ErrorTable, len(*corrTable))
 
 	for corr, idxList := range *corrTable {
