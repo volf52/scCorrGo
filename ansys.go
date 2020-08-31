@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	n := 8.0
+	n := 256.0
 	intn := int(n)
-	streamEncoding := "bpe"
+	streamEncoding := "OR_upe"
 
 	abcdTable := generateUniqueTuples(intn)
 	corrTypes := []string{"scc", "anderson", "dice", "jaccard", "ku2", "ochiai", "pearson", "sorensen", "ss2"}

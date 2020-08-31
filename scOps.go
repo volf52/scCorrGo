@@ -75,6 +75,13 @@ func GetErrorBpe(tuple *abcdTuple, n float64) float64 {
 	return (xVal * yVal) - XnorResult
 }
 
+func GetErrorORUpe(tuple *abcdTuple, n float64) float64 {
+	xVal, yVal := tuple.UpeValue(n)
+	orResult := tuple.Or() / n
+
+	return (xVal + yVal) - orResult
+}
+
 func rmse(idxList *[]int, abcdTable *ABCDTable, n float64, fn ErrorFunc) float64 {
 	var errVal float64
 
@@ -97,6 +104,8 @@ func (abcdTable *ABCDTable) CalculateErrors(corrTable *StringCorrTable, n float6
 		fn = GetErrorUpe
 	case "bpe":
 		fn = GetErrorBpe
+	case "OR_upe":
+		fn = GetErrorORUpe
 	default:
 		panic(fmt.Sprintf("%s is not an error function", tp))
 	}
