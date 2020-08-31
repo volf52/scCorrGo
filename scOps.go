@@ -14,10 +14,6 @@ func (tuple *abcdTuple) GetOnes() (float64, float64) {
 	return xOnes, yOnes
 }
 
-func UpeValue(nOnes float64, n float64) float64 {
-	return nOnes / n
-}
-
 func (tuple *abcdTuple) UpeValue(n float64) (float64, float64) {
 	xOnes := tuple.a + tuple.b
 	yOnes := tuple.a + tuple.c
@@ -27,13 +23,17 @@ func (tuple *abcdTuple) UpeValue(n float64) (float64, float64) {
 	return xVal, yVal
 }
 
-//TODO: Complete
+func BpeDecode(normalVal, n float64) float64 {
+	return (2*normalVal - n) / n
+}
+
 func (tuple *abcdTuple) BpeValue(n float64) (float64, float64) {
 	xOnes := tuple.a + tuple.b
 	yOnes := tuple.a + tuple.c
 
 	xVal := (2*xOnes - n) / n
 	yVal := (2*yOnes - n) / n
+
 	return xVal, yVal
 }
 
@@ -68,12 +68,11 @@ func GetErrorUpe(tuple *abcdTuple, n float64) float64 {
 	return (xVal * yVal) - andResult
 }
 
-//TODO: Complete
 func GetErrorBpe(tuple *abcdTuple, n float64) float64 {
-	xVal, yVal := tuple.UpeValue(n)
-	andResult := tuple.a / n
+	xVal, yVal := tuple.BpeValue(n)
+	XnorResult := BpeDecode(tuple.Xnor(), n)
 
-	return (xVal * yVal) - andResult
+	return (xVal * yVal) - XnorResult
 }
 
 func rmse(idxList *[]int, abcdTable *ABCDTable, n float64, fn ErrorFunc) float64 {

@@ -1,28 +1,26 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+	"time"
+)
 
 func main() {
-	n := 2.0
+	n := 8.0
 	intn := int(n)
-	//streamEncoding := "upe"
+	streamEncoding := "bpe"
 
-	abcdTable := generate_unique_tuples(intn)
+	abcdTable := generateUniqueTuples(intn)
+	corrTypes := []string{"scc", "anderson", "dice", "jaccard", "ku2", "ochiai", "pearson", "sorensen", "ss2"}
 
-	for _, tuple := range *abcdTable {
-		xVal, yVal := tuple.BpeValue(n)
-		fmt.Printf("%v --> X = %v, Y = %v\n", tuple, xVal, yVal)
+	var wg sync.WaitGroup
+	start := time.Now()
+	for _, tp := range corrTypes {
+		wg.Add(1)
+		go ErrorWorker(abcdTable, n, intn, tp, streamEncoding, &wg)
 	}
-
-	//corrTypes := []string{"scc", "anderson", "dice", "jaccard", "ku2", "ochiai", "pearson", "sorensen", "ss2"}
-	//
-	//var wg sync.WaitGroup
-	//start := time.Now()
-	//for _, tp := range corrTypes {
-	//	wg.Add(1)
-	//	go ErrorWorker(abcdTable, n, intn, tp, streamEncoding, &wg)
-	//}
-	//wg.Wait()
-	//elapsed := time.Since(start)
-	//fmt.Printf("Took %v seconds", elapsed)
+	wg.Wait()
+	elapsed := time.Since(start)
+	fmt.Printf("Took %v\n", elapsed)
 }
