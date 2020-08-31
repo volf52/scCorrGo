@@ -41,7 +41,7 @@ func getNumOfUniqueTuples(n int) int {
 	return ts
 }
 
-func generate_unique_tuples(N int) *ABCDTable {
+func generateUniqueTuples(N int) *ABCDTable {
 	arr := make(ABCDTable, getNumOfUniqueTuples(N))
 
 	idx := 0
